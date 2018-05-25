@@ -1,0 +1,40 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>テンキー日本語</title>
+        <style>
+            #chars {
+                border: 1px solid black;
+                margin: 0.5em;
+            }
+
+            .candidates {
+                list-style: none;
+                margin: 1em 0.4em;
+                padding: 0;
+                display: inline-block;
+            }
+
+            .candidate {
+                text-align: center;
+                border: 1px solid black;
+                margin: 0.2em 0;
+                padding: 0.2em;
+            }
+
+            #current {
+                border: 1px dashed black;
+                width: 100px;
+                height: 100px;
+            }
+        </style>
+        <script src="tenkey-ja.js"></script>
+    </head>
+    <body>
+        <p>テンキーで日本語入力</p>
+        <div id="chars"></div>
+        <div id="console"></div>
+    </body>
+</html>
+
