@@ -6,15 +6,15 @@
  */
 function keyCodeToSiin(keycode) {
     switch (keycode) {
-        case "Numpad1": return "a";
-        case "Numpad2": return "k";
-        case "Numpad3": return "s";
+        case "Numpad7": return "a";
+        case "Numpad8": return "k";
+        case "Numpad9": return "s";
         case "Numpad4": return "t";
         case "Numpad5": return "n";
         case "Numpad6": return "h";
-        case "Numpad7": return "m";
-        case "Numpad8": return "y";
-        case "Numpad9": return "r";
+        case "Numpad1": return "m";
+        case "Numpad2": return "y";
+        case "Numpad3": return "r";
         case "Numpad0":
         case "NumpadDecimal": return "w";
         case "KeyQ": return "a";
