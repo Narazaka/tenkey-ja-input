@@ -125,7 +125,7 @@ function speak(str) {
 setInterval(() => {
     if (!speakCalled || !msg || typeof speechSynthesis === "undefined" || speechSynthesis.speaking) return;
     speakCalled = false;
-    msg.text = speakChars[speakChars.length - 1];
+    msg.text = speakChars[speakChars.length - 1] + "ー";
     speechSynthesis.speak(msg);
 }, 250);
 
