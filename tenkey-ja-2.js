@@ -235,6 +235,10 @@ window.addEventListener("keydown", (event) => {
         keypressed[siin] = time;
         if (timeDiff < minTimeDiff) return;
     }
+    press(siin);
+});
+
+function press(siin) {
     processSiinPress(siin);
     if (siin === "-") return;
     const chars = siinsToKanas(allSiinPresses);
@@ -249,4 +253,4 @@ window.addEventListener("keydown", (event) => {
     }
 
     speak(chars);
-});
+}
