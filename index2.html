@@ -68,6 +68,14 @@
             <p><label>文字サイズ<input id="fontSize" type="range" min="10" max="120" style="width:50%"><span id="fontSizeDisplay"></span></label></p>
             <p><label>長押し検出<input id="minTimeDiff" type="checkbox"><span id="minTimeDiffDisplay"></span></label></p>
             <p><label>声<select id="voice"></select></label></p>
+            <p><label>配列
+                <select id="keymap">
+                    <option value="col">0=子音 .=母音 Enter=確定</option>
+                    <option value="col+">0=子音 1=逆子音 .=母音 Enter=確定</option>
+                    <option value="row">4=子音 1=母音 0=確定</option>
+                    <option value="row+">7=逆子音 4=子音 1=母音 0=確定</option>
+                </select>
+            </label></p>
         </div>
         <table class="example">
             <tr>

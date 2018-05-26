@@ -1,8 +1,9 @@
 // @ts-check
 
-/** @typedef {"s" | "b" | "-"} Type */
+/** @typedef {"rs" | "s" | "b" | "-"} Type */
 
-/** @typedef {{s: number; b: number}} PressedChar */
+/** @type {string | undefined} */
+let useKeymap;
 
 /**
  * キーコードを種別に変換
@@ -10,10 +11,41 @@
  * @return {Type | undefined}
  */
 function keyToType(keycode) {
-    switch (keycode) {
-        case "Numpad0": return "s";
-        case "NumpadDecimal": return "b";
-        case "NumpadEnter": return "-";
+    switch (useKeymap) {
+        case "col+":
+            switch (keycode) {
+                case "Numpad1": return "rs";
+                case "Numpad0": return "s";
+                case "NumpadDecimal": return "b";
+                case "NumpadEnter": return "-";
+                case "KeyA": return "rs";
+            }
+            break;
+        case "row":
+            switch (keycode) {
+                case "Numpad4": return "s";
+                case "Numpad1": return "b";
+                case "Numpad0": return "-";
+            }
+            break;
+        case "row+":
+            switch (keycode) {
+                case "Numpad7": return "rs";
+                case "Numpad4": return "s";
+                case "Numpad1": return "b";
+                case "Numpad0": return "-";
+                case "KeyA": return "rs";
+            }
+            break;
+        default: // col
+            switch (keycode) {
+                case "Numpad0": return "s";
+                case "NumpadDecimal": return "b";
+                case "NumpadEnter": return "-";
+            }
+            break;
+    }
+    switch (keycode) { // for debug
         case "KeyZ": return "s";
         case "KeyX": return "b";
         case "KeyC": return "-";
@@ -34,14 +66,47 @@ const pressedCharToCharTable = [
     "わをん",
 ];
 
-/**
- * 子音個数をかなに
- * @param {PressedChar} pressedChar 
- */
-function pressedCharToChar(pressedChar) {
-    const row = pressedCharToCharTable[pressedChar.s % pressedCharToCharTable.length];
-    if (!row) return;
-    return row[pressedChar.b % row.length];
+class PressedChar {
+    constructor() {
+        this.s = /** @type {number | undefined} */ (undefined);
+        this.b = /** @type {number | undefined} */ (undefined);
+    }
+
+    nextSiin() {
+        this.initialize() || ++this.s;
+    }
+
+    nextBoin() {
+        this.initialize() || ++this.b;
+    }
+
+    backSiin() {
+        this.initialize() || --this.s;
+    }
+
+    get char() {
+        if (this.s == null || this.b == null) return;
+        let rowIndex = this.s % pressedCharToCharTable.length;
+        if (rowIndex < 0) rowIndex += pressedCharToCharTable.length;
+        const row = pressedCharToCharTable[rowIndex];
+        let colIndex = this.b % row.length;
+        if (colIndex < 0) colIndex += row.length;
+        return row[colIndex];
+    }
+
+    /** @private */
+    initialize() {
+        let changed = false;
+        if (this.s == null) {
+            this.s = 0;
+            changed = true;
+        }
+        if (this.b == null) {
+            this.b = 0;
+            changed = true;
+        }
+        return changed;
+    }
 }
 
 class PressedChars {
@@ -51,16 +116,35 @@ class PressedChars {
     }
 
     get latest() { return this.all[this.all.length - 1]; }
+
     next() {
-        this.all.push({s: -1, b: 0});
+        this.all.push(new PressedChar());
     }
 
     get chars() {
-        return this.all.map(pressedCharToChar).filter(c => c != null);
+        return this.all.map(pc => pc.char).filter(c => c != null);
     }
 }
 
 const pressedChars = new PressedChars();
+
+class Elem {
+    get fontSize() { return /** @type {HTMLInputElement} */ (this.getCache("fontSize")); }
+    get minTimeDiff() { return /** @type {HTMLInputElement} */ (this.getCache("minTimeDiff")); }
+    get voice() { return /** @type {HTMLSelectElement} */ (this.getCache("voice")); }
+    get keymap() { return /** @type {HTMLSelectElement} */ (this.getCache("keymap")); }
+    /**
+     * @private
+     * @param {string} id 
+     * @return {HTMLElement}
+     */
+    getCache(id) {
+        if (!this[`_${id}`]) this[`_${id}`] = document.getElementById(id);
+        return this[`_${id}`];
+    }
+}
+
+const elem = new Elem();
 
 /** @type {SpeechSynthesisUtterance | undefined} */
 let msg;
@@ -114,19 +198,18 @@ window.addEventListener("DOMContentLoaded", () => {
         speechSynthesis.onvoiceschanged = getVoice;
         getVoice();
     }
-    const fontSizeElem = /** @type {HTMLInputElement} */ (document.getElementById("fontSize"));
-    const minTimeDiffElem = /** @type {HTMLInputElement} */ (document.getElementById("minTimeDiff"));
-    const voiceElem = /** @type {HTMLSelectElement} */ (document.getElementById("voice"));
-    fontSizeElem.addEventListener("change", applySettingFromInput);
-    fontSizeElem.addEventListener("input", applySettingFromInput);
-    minTimeDiffElem.addEventListener("change", applySettingFromInput);
-    minTimeDiffElem.addEventListener("input", applySettingFromInput);
-    voiceElem.addEventListener("change", applySettingFromInput);
-    voiceElem.addEventListener("input", applySettingFromInput);
+    elem.fontSize.addEventListener("change", applySettingFromInput);
+    elem.fontSize.addEventListener("input", applySettingFromInput);
+    elem.minTimeDiff.addEventListener("change", applySettingFromInput);
+    elem.minTimeDiff.addEventListener("input", applySettingFromInput);
+    elem.voice.addEventListener("change", applySettingFromInput);
+    elem.voice.addEventListener("input", applySettingFromInput);
+    elem.keymap.addEventListener("change", applySettingFromInput);
+    elem.keymap.addEventListener("input", applySettingFromInput);
     applySetting(loadSetting(), true);
 });
 
-/** @typedef {{fontSize: string; minTimeDiff: "1" | "", voice: string}} Setting */
+/** @typedef {{fontSize: string; minTimeDiff: "1" | "", voice: string; keymap: string}} Setting */
 
 /** @return {Setting} */
 function loadSetting() {
@@ -134,6 +217,7 @@ function loadSetting() {
         fontSize: localStorage.getItem("fontSize") || "20",
         minTimeDiff: /** @type {"1" | ""} */ localStorage.getItem("minTimeDiff") ? "1" : "",
         voice: /** @type {"1" | ""} */ localStorage.getItem("voice") || "",
+        keymap: localStorage.getItem("keymap") || "col",
     };
 }
 
@@ -144,17 +228,16 @@ function saveSetting(setting) {
     localStorage.setItem("fontSize", setting.fontSize);
     localStorage.setItem("minTimeDiff", setting.minTimeDiff);
     localStorage.setItem("voice", setting.voice);
+    localStorage.setItem("keymap", setting.keymap);
 }
 
 /** @return {Setting} */
 function getSetting() {
-    const fontSizeElem = /** @type {HTMLInputElement} */ (document.getElementById("fontSize"));
-    const minTimeDiffElem = /** @type {HTMLInputElement} */ (document.getElementById("minTimeDiff"));
-    const voiceElem = /** @type {HTMLSelectElement} */ (document.getElementById("voice"));
     return {
-        fontSize: fontSizeElem.value,
-        minTimeDiff: minTimeDiffElem.checked ? "1" : "",
-        voice: voiceElem.value,
+        fontSize: elem.fontSize.value,
+        minTimeDiff: elem.minTimeDiff.checked ? "1" : "",
+        voice: elem.voice.value,
+        keymap: elem.keymap.value,
     };
 }
 
@@ -168,6 +251,7 @@ function applySetting(setting, showInput = false) {
     charsElem.style.fontSize = setting.fontSize + "px";
     useMinTimeDiff = Boolean(setting.minTimeDiff);
     if (voices) setVoice(setting.voice);
+    useKeymap = setting.keymap;
 
     saveSetting(setting);
     showSetting(setting, showInput);
@@ -183,23 +267,21 @@ function applySettingFromInput() {
  * @param {boolean} showInput 
  */
 function showSetting(setting, showInput = false) {
-    const fontSizeElem = /** @type {HTMLInputElement} */ (document.getElementById("fontSize"));
-    const minTimeDiffElem = /** @type {HTMLInputElement} */ (document.getElementById("minTimeDiff"));
-    const voiceElem = /** @type {HTMLSelectElement} */ (document.getElementById("voice"));
     const fontSizeDisplayElem = document.getElementById("fontSizeDisplay");
     const minTimeDiffDisplayElem = document.getElementById("minTimeDiffDisplay");
     if (showInput) {
-        fontSizeElem.value = setting.fontSize;
-        minTimeDiffElem.checked = setting.minTimeDiff === "1";
-        if (!voiceElem.childElementCount && voices) {
+        elem.fontSize.value = setting.fontSize;
+        elem.minTimeDiff.checked = setting.minTimeDiff === "1";
+        if (!elem.voice.childElementCount && voices) {
             for (const voice of voices) {
                 const optionElem = /** @type {HTMLOptionElement} */ (document.createElement("option"));
                 optionElem.textContent = `${voice.name} [${voice.lang}] (${voice.localService ? "local" : "remote"})`;
                 optionElem.value = voice.name;
-                voiceElem.appendChild(optionElem);
+                elem.voice.appendChild(optionElem);
             }
         }
-        voiceElem.value = setting.voice;
+        elem.voice.value = setting.voice;
+        elem.keymap.value = setting.keymap;
     }
     fontSizeDisplayElem.textContent = setting.fontSize;
     minTimeDiffDisplayElem.textContent = setting.minTimeDiff ? "ON" : "OFF";
@@ -230,14 +312,9 @@ window.addEventListener("keydown", (event) => {
 function press(type) {
     if (!pressedChars.latest) pressedChars.next(); // 初回
     switch (type) {
-        case "s": ++pressedChars.latest.s; break;
-        case "b":
-            if (pressedChars.latest.s === -1) {
-                pressedChars.latest.s = 0;
-                pressedChars.latest.b = -1;
-            }
-            ++pressedChars.latest.b;
-            break;
+        case "rs": pressedChars.latest.backSiin(); break;
+        case "s": pressedChars.latest.nextSiin(); break;
+        case "b": pressedChars.latest.nextBoin(); break;
         case "-": pressedChars.next(); break;
     }
     const chars = pressedChars.chars;
