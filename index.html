@@ -1,41 +1,26 @@
 <!doctype html>
 <html>
     <head>
+        <meta name="viewport" content="width=device-width,initial-scale=1">
         <meta charset="utf-8">
-        <title>テンキー日本語</title>
+        <title>テンキー日本語(手動版)</title>
         <style>
             #chars {
                 border: 1px solid black;
                 margin: 0.5em;
+                font-size: x-large;
             }
 
-            .candidates {
-                list-style: none;
-                margin: 1em 0.4em;
-                padding: 0;
-                display: inline-block;
-            }
-
-            .candidate {
-                text-align: center;
+            #chars .char:last-child {
                 border: 1px solid black;
-                margin: 0.2em 0;
-                padding: 0.2em;
-            }
-
-            #current {
-                border: 1px dashed black;
-                width: 100px;
-                height: 100px;
+                background: #ffff99;
             }
         </style>
-        <script src="tenkey-ja.js"></script>
+        <script src="tenkey-ja-2.js"></script>
     </head>
     <body>
-        <p>テンキーで日本語入力</p>
+        <p>テンキーで日本語入力(連続同子音手動切り替え版)</p>
         <div id="chars"></div>
-        <div id="console"></div>
-        <input>
     </body>
 </html>
 
