@@ -1,6 +1,6 @@
 // @ts-check
 
-/** @typedef {"rs" | "s" | "b" | "-"} Type */
+/** @typedef {"rs" | "s" | "b" | "-" | "!" | "c"} Type */
 
 /** @type {string | undefined} */
 let useKeymap;
@@ -18,6 +18,8 @@ function keyToType(keycode) {
                 case "Numpad0": return "s";
                 case "NumpadDecimal": return "b";
                 case "NumpadEnter": return "-";
+                case "Numpad2": return "c";
+                case "Numpad3": return "!";
                 case "KeyA": return "rs";
             }
             break;
@@ -26,6 +28,8 @@ function keyToType(keycode) {
                 case "Numpad4": return "s";
                 case "Numpad1": return "b";
                 case "Numpad0": return "-";
+                case "Numpad2": return "c";
+                case "NumpadDecimal": return "!";
             }
             break;
         case "row+":
@@ -34,6 +38,8 @@ function keyToType(keycode) {
                 case "Numpad4": return "s";
                 case "Numpad1": return "b";
                 case "Numpad0": return "-";
+                case "Numpad2": return "c";
+                case "NumpadDecimal": return "!";
                 case "KeyA": return "rs";
             }
             break;
@@ -42,6 +48,8 @@ function keyToType(keycode) {
                 case "Numpad0": return "s";
                 case "NumpadDecimal": return "b";
                 case "NumpadEnter": return "-";
+                case "Numpad2": return "c";
+                case "Numpad3": return "!";
             }
             break;
     }
@@ -49,6 +57,8 @@ function keyToType(keycode) {
         case "KeyZ": return "s";
         case "KeyX": return "b";
         case "KeyC": return "-";
+        case "KeyS": return "c";
+        case "KeyD": return "!";
         case "Enter": return "-";
     }
 }
@@ -124,6 +134,10 @@ class PressedChars {
     get chars() {
         return this.all.map(pc => pc.char).filter(c => c != null);
     }
+
+    clear() {
+        this.all = [];
+    }
 }
 
 const pressedChars = new PressedChars();
@@ -133,6 +147,8 @@ class Elem {
     get minTimeDiff() { return /** @type {HTMLInputElement} */ (this.getCache("minTimeDiff")); }
     get voice() { return /** @type {HTMLSelectElement} */ (this.getCache("voice")); }
     get keymap() { return /** @type {HTMLSelectElement} */ (this.getCache("keymap")); }
+    get examples() { return ["row", "row+", "col", "col+"].map(keymap => this.example(keymap)); }
+    example(keymap) { return /** @type {HTMLTableElement} */ (this.getCache(`example-${keymap}`)); }
     /**
      * @private
      * @param {string} id 
@@ -152,18 +168,35 @@ let msg;
 let voices;
 
 let speakCalled = false;
-/** @type {string} */
+/** @type {string[]} */
 let speakChars;
+let kakutei = false;
+let all = false;
 
-function speak(str) {
+function speak(str, isKakutei = false) {
     speakCalled = true;
     speakChars = str;
+    kakutei = isKakutei;
+}
+
+function speakAll(str) {
+    speak(str);
+    all = true;
 }
 
 setInterval(() => {
     if (!speakCalled || !msg || typeof speechSynthesis === "undefined" || speechSynthesis.speaking) return;
     speakCalled = false;
-    msg.text = speakChars[speakChars.length - 1] + "ー";
+    if (all) {
+        msg.text = speakChars.join("");
+    } else {
+        if (speakChars.length) {
+            msg.text = speakChars[speakChars.length - 1] + "ー" + (kakutei ? "に確定" : "");
+        } else {
+            msg.text = "文字がないです";
+        }
+    }
+    all = false;
     speechSynthesis.speak(msg);
 }, 250);
 
@@ -285,6 +318,8 @@ function showSetting(setting, showInput = false) {
     }
     fontSizeDisplayElem.textContent = setting.fontSize;
     minTimeDiffDisplayElem.textContent = setting.minTimeDiff ? "ON" : "OFF";
+    for (const example of elem.examples) example.style.display = "none";
+    elem.example(setting.keymap).style.display = "table";
 }
 
 const keypressed = {};
@@ -311,11 +346,21 @@ window.addEventListener("keydown", (event) => {
  */
 function press(type) {
     if (!pressedChars.latest) pressedChars.next(); // 初回
+    let speaked = false;
     switch (type) {
         case "rs": pressedChars.latest.backSiin(); break;
         case "s": pressedChars.latest.nextSiin(); break;
         case "b": pressedChars.latest.nextBoin(); break;
         case "-": pressedChars.next(); break;
+        case "c":
+            pressedChars.clear();
+            speaked = true;
+            speakAll(["クリアします"]);
+            break;
+        case "!":
+            speaked = true;
+            speakAll(pressedChars.chars);
+            return;
     }
     const chars = pressedChars.chars;
     const charsElem = document.getElementById("chars");
@@ -328,5 +373,5 @@ function press(type) {
         charsElem.appendChild(charElem);
     }
 
-    speak(chars);
+    if (!speaked) speak(chars, type === "-");
 }
