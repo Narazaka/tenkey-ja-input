@@ -150,9 +150,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
 const keypressed = {};
 
-window.addEventListener("keypress", (event) => {
-    console.log(event.code);
-    console.log(event.key);
+window.addEventListener("keydown", (event) => {
     const siin = keyCodeToSiin(event.code);
     if (!siin) return;
     const time = new Date().getTime();
