@@ -156,13 +156,13 @@ window.addEventListener("DOMContentLoaded", () => {
     applySetting(loadSetting(), true);
 });
 
-/** @typedef {{fontSize: string; minTimeDiff: string}} Setting */
+/** @typedef {{fontSize: string; minTimeDiff: "1" | ""}} Setting */
 
 /** @return {Setting} */
 function loadSetting() {
     return {
         fontSize: localStorage.getItem("fontSize") || "20",
-        minTimeDiff: localStorage.getItem("minTimeDiff") || "600",
+        minTimeDiff: /** @type {"1" | ""} */ localStorage.getItem("minTimeDiff") ? "1" : "",
     };
 }
 
@@ -180,7 +180,7 @@ function getSetting() {
     const minTimeDiffElem = /** @type {HTMLInputElement} */ (document.getElementById("minTimeDiff"));
     return {
         fontSize: fontSizeElem.value,
-        minTimeDiff: minTimeDiffElem.value,
+        minTimeDiff: minTimeDiffElem.checked ? "1" : "",
     };
 }
 
@@ -192,7 +192,7 @@ function getSetting() {
 function applySetting(setting, showInput = false) {
     const charsElem = document.getElementById("chars");
     charsElem.style.fontSize = setting.fontSize + "px";
-    minTimeDiff = Number(setting.minTimeDiff);
+    useMinTimeDiff = Boolean(setting.minTimeDiff);
 
     saveSetting(setting);
     showSetting(setting, showInput);
@@ -214,24 +214,27 @@ function showSetting(setting, showInput = false) {
     const minTimeDiffDisplayElem = document.getElementById("minTimeDiffDisplay");
     if (showInput) {
         fontSizeElem.value = setting.fontSize;
-        minTimeDiffElem.value = setting.minTimeDiff;
+        minTimeDiffElem.checked = setting.minTimeDiff === "1";
     }
     fontSizeDisplayElem.textContent = setting.fontSize;
-    minTimeDiffDisplayElem.textContent = setting.minTimeDiff;
+    minTimeDiffDisplayElem.textContent = setting.minTimeDiff ? "ON" : "OFF";
 }
 
 const keypressed = {};
 /** @type {number} */
-let minTimeDiff;
+const minTimeDiff = 600;
+let useMinTimeDiff = true;
 
 window.addEventListener("keydown", (event) => {
     const siin = keyCodeToSiin(event.code);
     if (!siin) return;
-    const time = new Date().getTime();
-    const previousTime = keypressed[siin];
-    const timeDiff = time - (previousTime || 0);
-    keypressed[siin] = time;
-    if (timeDiff < minTimeDiff) return;
+    if (useMinTimeDiff) {
+        const time = new Date().getTime();
+        const previousTime = keypressed[siin];
+        const timeDiff = time - (previousTime || 0);
+        keypressed[siin] = time;
+        if (timeDiff < minTimeDiff) return;
+    }
     processSiinPress(siin);
     if (siin === "-") return;
     const chars = siinsToKanas(allSiinPresses);
