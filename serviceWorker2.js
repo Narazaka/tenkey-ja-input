@@ -1,4 +1,4 @@
-const VERSION = "10";
+const VERSION = "100";
 const ORIGIN = location.protocol + '//' + location.hostname + "/tenkey-ja-input";
 
 const STATIC_CACHE_KEY = 'static-' + VERSION;
