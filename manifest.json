@@ -1,7 +1,7 @@
 {
     "name": "テンキー日本語入力",
     "short_name": "テンキー日本語",
-    "start_url": "/",
+    "start_url": "/tenkey-ja-input",
     "display": "standalone",
     "theme_color": "#ffffff"
 }
