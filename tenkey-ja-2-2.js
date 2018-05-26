@@ -1,6 +1,6 @@
 // @ts-check
 
-/** @typedef {"rs" | "s" | "b" | "-" | "!" | "c"} Type */
+/** @typedef {"rs" | "s" | "b" | "-" | "!" | "c" | "T"} Type */
 
 /** @type {string | undefined} */
 let useKeymap;
@@ -14,6 +14,7 @@ function keyToType(keycode) {
     switch (useKeymap) {
         case "col+":
             switch (keycode) {
+                case "Numpad4": return "T";
                 case "Numpad1": return "rs";
                 case "Numpad0": return "s";
                 case "NumpadDecimal": return "b";
@@ -29,6 +30,7 @@ function keyToType(keycode) {
                 case "Numpad1": return "b";
                 case "Numpad0": return "-";
                 case "Numpad2": return "c";
+                case "Numpad5": return "T";
                 case "NumpadDecimal": return "!";
             }
             break;
@@ -39,12 +41,14 @@ function keyToType(keycode) {
                 case "Numpad1": return "b";
                 case "Numpad0": return "-";
                 case "Numpad2": return "c";
+                case "Numpad5": return "T";
                 case "NumpadDecimal": return "!";
                 case "KeyA": return "rs";
             }
             break;
         default: // col
             switch (keycode) {
+                case "Numpad4": return "T";
                 case "Numpad0": return "s";
                 case "NumpadDecimal": return "b";
                 case "NumpadEnter": return "-";
@@ -59,6 +63,7 @@ function keyToType(keycode) {
         case "KeyC": return "-";
         case "KeyS": return "c";
         case "KeyD": return "!";
+        case "KeyQ": return "T";
         case "Enter": return "-";
     }
 }
@@ -172,6 +177,7 @@ let speakCalled = false;
 let speakChars;
 let kakutei = false;
 let all = false;
+let tutorial = false;
 
 function speak(str, isKakutei = false) {
     speakCalled = true;
@@ -351,6 +357,16 @@ window.addEventListener("keydown", (event) => {
 function press(type) {
     if (!pressedChars.latest) pressedChars.next(); // 初回
     let speaked = false;
+    if (tutorial) {
+        switch (type) {
+            case "rs": speakAll(["前の子音"]); return;
+            case "s": speakAll(["次の子音"]); return;
+            case "b": speakAll(["次の母音"]); return;
+            case "-": speakAll(["仮名を確定"]); return;
+            case "c": speakAll(["文章をクリア"]); return;
+            case "!": speakAll(["文章を発音"]); return;
+        }
+    }
     switch (type) {
         case "rs": pressedChars.latest.backSiin(); break;
         case "s": pressedChars.latest.nextSiin(); break;
@@ -364,6 +380,10 @@ function press(type) {
         case "!":
             speaked = true;
             speakAll(pressedChars.chars);
+            return;
+        case "T":
+            tutorial = !tutorial;
+            speakAll(tutorial ? ["説明モード"] : ["通常モード"]);
             return;
     }
     const chars = pressedChars.chars;
