@@ -148,9 +148,18 @@ window.addEventListener("DOMContentLoaded", () => {
     getVoice();
 })
 
+const keypressed = {};
+
 window.addEventListener("keypress", (event) => {
+    console.log(event.code);
+    console.log(event.key);
     const siin = keyCodeToSiin(event.code);
     if (!siin) return;
+    const time = new Date().getTime();
+    const previousTime = keypressed[siin];
+    const timeDiff = time - (previousTime || 0);
+    keypressed[siin] = time;
+    if (timeDiff < 600) return;
     processSiinPress(siin);
     if (siin === "-") return;
     const chars = siinsToKanas(allSiinPresses);
