@@ -51,7 +51,8 @@
                 if ("serviceWorker" in navigator) {
                 navigator.serviceWorker.register("serviceWorker.js")
                     .then(function(registration) {
-                        console.log("serviceWorker registed.");
+                        registration.update();
+                        console.log("serviceWorker registed / updated.");
                     }).catch(function(error) {
                         console.warn("serviceWorker error.", error);
                     });
