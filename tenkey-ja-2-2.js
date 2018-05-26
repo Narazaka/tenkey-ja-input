@@ -188,7 +188,11 @@ setInterval(() => {
     if (!speakCalled || !msg || typeof speechSynthesis === "undefined" || speechSynthesis.speaking) return;
     speakCalled = false;
     if (all) {
-        msg.text = speakChars.join("");
+        if (speakChars.length) {
+            msg.text = speakChars.join("");
+        } else {
+            msg.text = "文字がないです";
+        }
     } else {
         if (speakChars.length) {
             msg.text = speakChars[speakChars.length - 1] + "ー" + (kakutei ? "に確定" : "");
