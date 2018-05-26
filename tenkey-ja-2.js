@@ -143,12 +143,86 @@ function getVoice() {
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-    if (typeof speechSynthesis === "undefined") return;
-    speechSynthesis.onvoiceschanged = getVoice;
-    getVoice();
-})
+    if (typeof speechSynthesis !== "undefined") {
+        speechSynthesis.onvoiceschanged = getVoice;
+        getVoice();
+    }
+    const fontSizeElem = /** @type {HTMLInputElement} */ (document.getElementById("fontSize"));
+    const minTimeDiffElem = /** @type {HTMLInputElement} */ (document.getElementById("minTimeDiff"));
+    fontSizeElem.addEventListener("change", applySettingFromInput);
+    fontSizeElem.addEventListener("input", applySettingFromInput);
+    minTimeDiffElem.addEventListener("change", applySettingFromInput);
+    minTimeDiffElem.addEventListener("input", applySettingFromInput);
+    applySetting(loadSetting(), true);
+});
+
+/** @typedef {{fontSize: string; minTimeDiff: string}} Setting */
+
+/** @return {Setting} */
+function loadSetting() {
+    return {
+        fontSize: localStorage.getItem("fontSize") || "20",
+        minTimeDiff: localStorage.getItem("minTimeDiff") || "600",
+    };
+}
+
+/**
+ * @param {Setting} setting 
+ */
+function saveSetting(setting) {
+    localStorage.setItem("fontSize", setting.fontSize);
+    localStorage.setItem("minTimeDiff", setting.minTimeDiff);
+}
+
+/** @return {Setting} */
+function getSetting() {
+    const fontSizeElem = /** @type {HTMLInputElement} */ (document.getElementById("fontSize"));
+    const minTimeDiffElem = /** @type {HTMLInputElement} */ (document.getElementById("minTimeDiff"));
+    return {
+        fontSize: fontSizeElem.value,
+        minTimeDiff: minTimeDiffElem.value,
+    };
+}
+
+/**
+ * 
+ * @param {Setting} setting 
+ * @param {boolean} showInput 
+ */
+function applySetting(setting, showInput = false) {
+    const charsElem = document.getElementById("chars");
+    charsElem.style.fontSize = setting.fontSize + "px";
+    minTimeDiff = Number(setting.minTimeDiff);
+
+    saveSetting(setting);
+    showSetting(setting, showInput);
+}
+
+function applySettingFromInput() {
+    applySetting(getSetting());
+}
+
+/**
+ * 
+ * @param {Setting} setting 
+ * @param {boolean} showInput 
+ */
+function showSetting(setting, showInput = false) {
+    const fontSizeElem = /** @type {HTMLInputElement} */ (document.getElementById("fontSize"));
+    const minTimeDiffElem = /** @type {HTMLInputElement} */ (document.getElementById("minTimeDiff"));
+    const fontSizeDisplayElem = document.getElementById("fontSizeDisplay");
+    const minTimeDiffDisplayElem = document.getElementById("minTimeDiffDisplay");
+    if (showInput) {
+        fontSizeElem.value = setting.fontSize;
+        minTimeDiffElem.value = setting.minTimeDiff;
+    }
+    fontSizeDisplayElem.textContent = setting.fontSize;
+    minTimeDiffDisplayElem.textContent = setting.minTimeDiff;
+}
 
 const keypressed = {};
+/** @type {number} */
+let minTimeDiff;
 
 window.addEventListener("keydown", (event) => {
     const siin = keyCodeToSiin(event.code);
@@ -157,7 +231,7 @@ window.addEventListener("keydown", (event) => {
     const previousTime = keypressed[siin];
     const timeDiff = time - (previousTime || 0);
     keypressed[siin] = time;
-    if (timeDiff < 600) return;
+    if (timeDiff < minTimeDiff) return;
     processSiinPress(siin);
     if (siin === "-") return;
     const chars = siinsToKanas(allSiinPresses);

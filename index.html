@@ -3,11 +3,17 @@
     <head>
         <meta name="viewport" content="width=device-width,initial-scale=1">
         <meta charset="utf-8">
-        <title>テンキー日本語(手動版)</title>
+        <title>テンキー日本語入力</title>
         <style>
+            html, body {
+                margin: 0;
+                padding: 0;
+                width: 100%;
+            }
+
             #chars {
                 border: 1px solid black;
-                margin: 0.5em;
+                margin: 5%;
                 font-size: x-large;
             }
 
@@ -15,12 +21,57 @@
                 border: 1px solid black;
                 background: #ffff99;
             }
+
+            .setting {
+                width: 100%;
+            }
+            .setting label {
+                display: block;
+                width: 100%;
+            }
+
+            .example, .example td {
+                margin: auto;
+                border: 1px solid black;
+                border-collapse: collapse;
+            }
+            .example td {
+                text-align: center;
+                width: 60px;
+                height: 60px;
+            }
         </style>
         <script src="tenkey-ja-2.js"></script>
     </head>
     <body>
-        <p>テンキーで日本語入力(連続同子音手動切り替え版)</p>
+        <p>テンキー日本語入力</p>
         <div id="chars"></div>
+        <div class="setting">
+            <p><label>文字サイズ<input id="fontSize" type="range" min="10" max="120" style="width:50%"><span id="fontSizeDisplay"></span></label></p>
+            <p><label>長押し検出<input id="minTimeDiff" type="range" min="0" max="1500" style="width:50%"><span id="minTimeDiffDisplay"></span>ミリ秒</label></p>
+        </div>
+        <table class="example">
+            <tr>
+                <td>7<br>あ</td>
+                <td>8<br>か</td>
+                <td>9<br>さ</td>
+            </tr>
+            <tr>
+                <td>4<br>た</td>
+                <td>5<br>な</td>
+                <td>6<br>は</td>
+            </tr>
+            <tr>
+                <td>1<br>ま</td>
+                <td>2<br>や</td>
+                <td>3<br>ら</td>
+            </tr>
+            <tr>
+                <td>0<br>わ</td>
+                <td>.<br>わ</td>
+                <td>Enter →</td>
+            </tr>
+        </table>
     </body>
 </html>
 
