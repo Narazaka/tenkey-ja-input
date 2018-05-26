@@ -1,0 +1,7 @@
+{
+    "name": "3キー日本語入力",
+    "short_name": "3キー日本語",
+    "start_url": "/tenkey-ja-input/index2.html",
+    "display": "standalone",
+    "theme_color": "#ffcccc"
+}

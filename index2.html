@@ -1,0 +1,81 @@
+<!doctype html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <link rel="manifest" href="manifest2.json">
+        <meta charset="utf-8">
+        <title>3キー日本語入力</title>
+        <style>
+            html, body {
+                margin: 0;
+                padding: 0;
+                width: 100%;
+            }
+
+            #chars {
+                border: 1px solid black;
+                margin: 5%;
+                font-size: x-large;
+            }
+
+            #chars .char:last-child {
+                border: 1px solid black;
+                background: #ffff99;
+            }
+
+            .setting {
+                width: 100%;
+            }
+            .setting label {
+                display: block;
+                width: 100%;
+            }
+
+            .example, .example td {
+                margin: auto;
+                border: 1px solid black;
+                border-collapse: collapse;
+            }
+            .example tr, .example td {
+                margin: 0;
+                padding: 0;
+            }
+            .example td {
+                text-align: center;
+                width: 60px;
+                height: 60px;
+            }
+        </style>
+        <script>
+            window.addEventListener("load", function() {
+                if ("serviceWorker" in navigator) {
+                navigator.serviceWorker.register("serviceWorker2.js")
+                    .then(function(registration) {
+                        registration.update();
+                        console.log("serviceWorker registed / updated.");
+                    }).catch(function(error) {
+                        console.warn("serviceWorker error.", error);
+                    });
+                }
+            });
+        </script>
+        <script src="tenkey-ja-2-2.js"></script>
+    </head>
+    <body>
+        <p>3キー日本語入力</p>
+        <div id="chars"></div>
+        <div class="setting">
+            <p><label>文字サイズ<input id="fontSize" type="range" min="10" max="120" style="width:50%"><span id="fontSizeDisplay"></span></label></p>
+            <p><label>長押し検出<input id="minTimeDiff" type="checkbox"><span id="minTimeDiffDisplay"></span></label></p>
+            <p><label>声<select id="voice"></select></label></p>
+        </div>
+        <table class="example">
+            <tr>
+                <td onmousedown="press('s')">0<br>子</td>
+                <td onmousedown="press('b')">.<br>母</td>
+                <td onmousedown="press('-')">Enter<br>確定</td>
+            </tr>
+        </table>
+    </body>
+</html>
+
