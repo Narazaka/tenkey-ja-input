@@ -178,6 +178,7 @@ let speakChars;
 let kakutei = false;
 let all = false;
 let tutorial = false;
+let reserveClear = false;
 
 function speak(str, isKakutei = false) {
     speakCalled = true;
@@ -363,19 +364,26 @@ function press(type) {
             case "s": speakAll(["次の子音"]); return;
             case "b": speakAll(["次の母音"]); return;
             case "-": speakAll(["仮名を確定"]); return;
-            case "c": speakAll(["文章をクリア"]); return;
+            case "c": speakAll(["2回押すと文章をクリア"]); return;
             case "!": speakAll(["文章を発音"]); return;
         }
     }
+    if (type !== "c") reserveClear = false;
     switch (type) {
         case "rs": pressedChars.latest.backSiin(); break;
         case "s": pressedChars.latest.nextSiin(); break;
         case "b": pressedChars.latest.nextBoin(); break;
         case "-": pressedChars.next(); break;
         case "c":
-            pressedChars.clear();
-            speaked = true;
-            speakAll(["クリアします"]);
+            if (reserveClear) {
+                pressedChars.clear();
+                speaked = true;
+                speakAll(["クリアしました"]);
+            } else {
+                reserveClear = true;
+                speaked = true;
+                speakAll(["クリアしますか？"]);
+            }
             break;
         case "!":
             speaked = true;
