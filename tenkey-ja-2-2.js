@@ -217,7 +217,7 @@ function getVoice() {
     voices = _voices;
     showSetting(loadSetting(), true);
     setVoice(getSetting().voice);
-    msg.rate = 0.5;
+    msg.rate = 0.7;
     msg.volume = 1;
     msg.pitch = 1;
     msg.lang = "ja-JP";
